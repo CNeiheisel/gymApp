@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import WorkoutTemplate, WorkoutEntry, LoggedExercise
+from .models import WorkoutTemplate, TemplateExercise, LoggedWorkout, LoggedExercise, Exercise
 
 # Home page
 def home(request):
@@ -44,26 +44,28 @@ def logout_view(request):
 # List all workout templates
 @login_required
 def templates(request):
-    templates = WorkoutTemplate.objects.all()
+    templates = WorkoutTemplate.objects.filter(user=request.user)
     return render(request, "workouts/templates.html", {"templates": templates})
 
 # Log a workout based on a template
 @login_required
 def log_workout(request, template_id):
-    template = get_object_or_404(WorkoutTemplate, id=template_id)
-    
+    template = get_object_or_404(WorkoutTemplate, id=template_id, user=request.user)
+
     if request.method == "POST":
-        workout = Workout.objects.create(user=request.user, template=template)
-        for te in template.exercises.all():
-            weight = request.POST.get(f"weight_{te.id}")
-            reps = request.POST.get(f"reps_{te.id}")
-            if weight and reps:
-                WorkoutEntry.objects.create(
-                    workout=workout,
-                    exercise=te.exercise,
-                    weight=weight,
-                    reps=reps
-                )
+        # Create a new LoggedWorkout
+        workout = LoggedWorkout.objects.create(user=request.user, template=template)
+
+        # Log exercises based on the template
+        for te in template.exercises.all():  # TemplateExercise objects
+            weight = request.POST.get(f"weight_{te.id}", 0)
+            reps = request.POST.get(f"reps_{te.id}", te.reps)
+            LoggedExercise.objects.create(
+                workout=workout,
+                exercise=te.exercise,
+                weight=weight,
+                reps=reps
+            )
         return redirect("history")
 
     return render(request, "workouts/log_workout.html", {"template": template})
@@ -71,5 +73,5 @@ def log_workout(request, template_id):
 # Show user's workout history
 @login_required
 def history(request):
-    workouts = Workout.objects.filter(user=request.user).order_by("-date")
+    workouts = LoggedWorkout.objects.filter(user=request.user).order_by("-date")
     return render(request, "workouts/history.html", {"workouts": workouts})
