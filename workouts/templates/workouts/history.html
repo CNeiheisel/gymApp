@@ -1,0 +1,11 @@
+<h2>Workout History</h2>
+<ul>
+  {% for w in workouts %}
+    <li>{{ w.date }} - {{ w.template.name }}</li>
+    <ul>
+      {% for ex in w.exercises.all %}
+        <li>{{ ex.exercise.name }}: {{ ex.weight }} kg × {{ ex.reps }} reps</li>
+      {% endfor %}
+    </ul>
+  {% endfor %}
+</ul>

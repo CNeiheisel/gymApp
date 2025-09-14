@@ -1,0 +1,6 @@
+<h1>Welcome to Gym Tracker</h1>
+{% if user.is_authenticated %}
+  <p><a href="{% url 'templates' %}">My Templates</a> | <a href="{% url 'history' %}">History</a></p>
+{% else %}
+  <p><a href="/admin/login/">Login</a></p>
+{% endif %}

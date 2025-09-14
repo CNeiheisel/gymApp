@@ -1,0 +1,8 @@
+
+
+<h2>My Workout Templates</h2>
+<ul>
+  {% for t in templates %}
+    <li>{{ t.name }} - <a href="{% url 'log_workout' t.id %}">Log workout</a></li>
+  {% endfor %}
+</ul>

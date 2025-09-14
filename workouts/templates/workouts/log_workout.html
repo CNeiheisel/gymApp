@@ -1,0 +1,11 @@
+<h2>Log Workout - {{ template.name }}</h2>
+<form method="post">
+  {% csrf_token %}
+  {% for te in template.exercises.all %}
+    <p>{{ te.exercise.name }}:
+       <input type="number" name="weight_{{te.id}}" placeholder="Weight">
+       <input type="number" name="reps_{{te.id}}" placeholder="Reps">
+    </p>
+  {% endfor %}
+  <button type="submit">Save</button>
+</form>
