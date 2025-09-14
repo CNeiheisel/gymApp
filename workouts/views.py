@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.views.decorators.http import require_POST
 from .models import WorkoutTemplate, TemplateExercise, LoggedWorkout, LoggedExercise, Exercise
 
 # Home page
@@ -36,7 +37,9 @@ def login_view(request):
         form = AuthenticationForm()
     return render(request, "workouts/login.html", {"form": form})
 
-# Logout view
+# Logout (POST method only for security)
+@require_POST
+@login_required
 def logout_view(request):
     logout(request)
     return redirect("home")
