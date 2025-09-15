@@ -146,6 +146,15 @@ def log_workout(request, template_id):
         return redirect("history")
 
     return render(request, "workouts/log_workout.html", {"template": template})
+    
+@login_required
+def delete_template(request, template_id):
+    template = get_object_or_404(WorkoutTemplate, id=template_id, user=request.user)
+    if request.method == "POST":
+        template.delete()
+        messages.success(request, "Template deleted successfully.")
+        return redirect('templates')
+    return render(request, 'workouts/confirm_delete.html', {'template': template})
 
 
 # ----------------------
