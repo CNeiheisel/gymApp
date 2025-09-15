@@ -64,6 +64,10 @@ def create_template(request):
                 new_sets = request.POST.get(f"form-{i}-sets", "").strip()
                 new_reps = request.POST.get(f"form-{i}-reps", "").strip()
 
+                # ✅ Apply defaults if blank
+                sets_val = int(new_sets) if new_sets.isdigit() else 3
+                reps_val = int(new_reps) if new_reps.isdigit() else 10
+
                 if new_name:  # Create new exercise
                     new_exercise = Exercise.objects.create(
                         name=new_name,
@@ -72,8 +76,8 @@ def create_template(request):
                     TemplateExercise.objects.create(
                         template=template,
                         exercise=new_exercise,
-                        sets=int(new_sets) if new_sets else 3,
-                        reps=int(new_reps) if new_reps else 10
+                        sets=sets_val,
+                        reps=reps_val
                     )
                 elif form.cleaned_data.get("exercise"):  # Use existing exercise
                     exercise_instance = form.save(commit=False)
@@ -123,6 +127,10 @@ def edit_template(request, template_id):
                 new_sets = request.POST.get(f"form-{i}-sets", "").strip()
                 new_reps = request.POST.get(f"form-{i}-reps", "").strip()
 
+                # ✅ Apply defaults if blank
+                sets_val = int(new_sets) if new_sets.isdigit() else 3
+                reps_val = int(new_reps) if new_reps.isdigit() else 10
+
                 if new_ex_name:  # Add new exercise
                     new_exercise = Exercise.objects.create(
                         name=new_ex_name,
@@ -131,8 +139,8 @@ def edit_template(request, template_id):
                     TemplateExercise.objects.create(
                         template=template,
                         exercise=new_exercise,
-                        sets=int(new_sets) if new_sets else 3,
-                        reps=int(new_reps) if new_reps else 10
+                        sets=sets_val,
+                        reps=reps_val
                     )
                 elif form.cleaned_data.get("exercise"):  # Update existing
                     exercise_instance = form.save(commit=False)
@@ -163,12 +171,14 @@ def log_workout(request, template_id):
         for te in template.exercises.all():
             weight = request.POST.get(f"weight_{te.id}", 0)
             reps = request.POST.get(f"reps_{te.id}", te.reps)
+
             LoggedExercise.objects.create(
                 workout=workout,
                 exercise=te.exercise,
-                weight=weight,
-                reps=reps
+                weight=float(weight) if weight else 0,
+                reps=int(reps) if reps else te.reps
             )
+
         messages.success(request, "Workout logged successfully!")
         return redirect("history")
 
