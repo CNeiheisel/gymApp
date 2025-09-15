@@ -10,23 +10,16 @@ class WorkoutTemplateForm(forms.ModelForm):
         }
 
 class TemplateExerciseForm(forms.ModelForm):
-    # New exercise fields
-    new_exercise_name = forms.CharField(
-        max_length=100,
-        required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Exercise Name'})
-    )
-    new_muscle_group = forms.CharField(
-        max_length=100,
-        required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Muscle Group'})
+    exercise = forms.ModelChoiceField(
+        queryset=None,  # We'll set this in __init__
+        required=False  # Make it optional
     )
 
     class Meta:
         model = TemplateExercise
-        fields = ['exercise', 'sets', 'reps']  # Optional: add 'weight'
-        widgets = {
-            'exercise': forms.Select(attrs={'class': 'form-select'}),
-            'sets': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-            'reps': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-        }
+        fields = ['exercise', 'sets', 'reps']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from .models import Exercise
+        self.fields['exercise'].queryset = Exercise.objects.all()
