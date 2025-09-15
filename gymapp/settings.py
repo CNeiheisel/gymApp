@@ -123,6 +123,11 @@ STATIC_URL = "static/"
 # Directory where collectstatic will put all static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Redirect after login for all users
+LOGIN_REDIRECT_URL = 'home'  # or '/' if you prefer
+LOGOUT_REDIRECT_URL = 'home'  # redirect after logout
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
