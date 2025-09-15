@@ -11,33 +11,30 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
     <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'home' %}">GymApp</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto">
-                {% if user.is_authenticated %}
-                    <li class="nav-item"><a class="nav-link" href="{% url 'templates' %}">Templates</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'history' %}">History</a></li>
-                    <li class="nav-item">
-                        <form action="{% url 'logout' %}" method="post" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="nav-link btn btn-link" style="display:inline; padding:0; color:inherit; text-decoration:none;">Logout</button>
-                        </form>
-                    </li>
-                {% else %}
-                    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
-                {% endif %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'templates' %}">Templates</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'history' %}">History</a></li>
+                <li class="nav-item">
+                    <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-link btn btn-link" style="padding:0; color:inherit; text-decoration:none;">Logout</button>
+                    </form>
+                </li>
             </ul>
         </div>
     </div>
 </nav>
 
-<!-- Main content -->
 <div class="container">
     <h2 class="mb-4">Create New Workout Template</h2>
-    
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
     <form method="post">
         {% csrf_token %}
         <div class="mb-3">
@@ -47,41 +44,18 @@
 
         <h4>Exercises</h4>
         {{ formset.management_form }}
-
         {% for form in formset %}
-            <div class="card mb-3 p-3">
-                <p><strong>Choose existing exercise:</strong></p>
-                <div class="mb-2">
-                    {{ form.exercise.label_tag }} {{ form.exercise }}
-                </div>
+            <div class="card mb-2 p-2">
+                {{ form.exercise.label_tag }} {{ form.exercise }}
+                {{ form.sets.label_tag }} {{ form.sets }}
+                {{ form.reps.label_tag }} {{ form.reps }}
 
-                <p><strong>Or add new exercise:</strong></p>
-                <div class="mb-2">
-                    <label for="id_new_exercise_name_{{ forloop.counter0 }}">Exercise Name:</label>
-                    <input type="text" name="form-{{ forloop.counter0 }}-new_exercise_name" 
-                           id="id_new_exercise_name_{{ forloop.counter0 }}" 
-                           class="form-control" placeholder="New exercise name">
-                </div>
-                <div class="mb-2">
-                    <label for="id_new_muscle_group_{{ forloop.counter0 }}">Muscle Group:</label>
-                    <input type="text" name="form-{{ forloop.counter0 }}-new_muscle_group" 
-                           id="id_new_muscle_group_{{ forloop.counter0 }}" 
-                           class="form-control" placeholder="Muscle group">
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        {{ form.sets.label_tag }} {{ form.sets }}
-                    </div>
-                    <div class="col">
-                        {{ form.reps.label_tag }} {{ form.reps }}
-                    </div>
-                </div>
+                <label>Add new exercise:</label>
+                <input type="text" name="form-{{ forloop.counter0 }}-new_exercise_name" placeholder="Exercise Name" class="form-control mb-1">
+                <input type="text" name="form-{{ forloop.counter0 }}-new_muscle_group" placeholder="Muscle Group" class="form-control mb-1">
 
                 {% if form.DELETE %}
-                    <div class="form-check mt-2">
-                        {{ form.DELETE }} <label class="form-check-label">Delete</label>
-                    </div>
+                    {{ form.DELETE }} <label>Delete</label>
                 {% endif %}
             </div>
         {% endfor %}
