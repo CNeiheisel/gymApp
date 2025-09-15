@@ -47,13 +47,41 @@
 
         <h4>Exercises</h4>
         {{ formset.management_form }}
+
         {% for form in formset %}
-            <div class="card mb-2 p-2">
-                {{ form.exercise.label_tag }} {{ form.exercise }}
-                {{ form.sets.label_tag }} {{ form.sets }}
-                {{ form.reps.label_tag }} {{ form.reps }}
+            <div class="card mb-3 p-3">
+                <p><strong>Choose existing exercise:</strong></p>
+                <div class="mb-2">
+                    {{ form.exercise.label_tag }} {{ form.exercise }}
+                </div>
+
+                <p><strong>Or add new exercise:</strong></p>
+                <div class="mb-2">
+                    <label for="id_new_exercise_name_{{ forloop.counter0 }}">Exercise Name:</label>
+                    <input type="text" name="form-{{ forloop.counter0 }}-new_exercise_name" 
+                           id="id_new_exercise_name_{{ forloop.counter0 }}" 
+                           class="form-control" placeholder="New exercise name">
+                </div>
+                <div class="mb-2">
+                    <label for="id_new_muscle_group_{{ forloop.counter0 }}">Muscle Group:</label>
+                    <input type="text" name="form-{{ forloop.counter0 }}-new_muscle_group" 
+                           id="id_new_muscle_group_{{ forloop.counter0 }}" 
+                           class="form-control" placeholder="Muscle group">
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        {{ form.sets.label_tag }} {{ form.sets }}
+                    </div>
+                    <div class="col">
+                        {{ form.reps.label_tag }} {{ form.reps }}
+                    </div>
+                </div>
+
                 {% if form.DELETE %}
-                    {{ form.DELETE }} <label>Delete</label>
+                    <div class="form-check mt-2">
+                        {{ form.DELETE }} <label class="form-check-label">Delete</label>
+                    </div>
                 {% endif %}
             </div>
         {% endfor %}
