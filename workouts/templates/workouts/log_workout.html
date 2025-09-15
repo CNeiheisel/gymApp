@@ -7,6 +7,7 @@
 </head>
 <body class="bg-light">
 
+<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
     <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'home' %}">GymApp</a>
@@ -34,20 +35,31 @@
             <div class="card mb-3 shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title">{{ te.exercise.name }} ({{ te.exercise.muscle_group }})</h5>
+                    <p class="text-muted">Target: {{ te.sets }} sets × {{ te.reps }} reps</p>
+
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="weight_{{ te.id }}" class="form-label">Weight (lbs)</label>
                             <input type="number" step="0.1" class="form-control" name="weight_{{ te.id }}" id="weight_{{ te.id }}" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="reps_{{ te.id }}" class="form-label">Reps</label>
+                            <label for="reps_{{ te.id }}" class="form-label">Reps Completed</label>
                             <input type="number" class="form-control" name="reps_{{ te.id }}" id="reps_{{ te.id }}" value="{{ te.reps }}" required>
                         </div>
                     </div>
                 </div>
             </div>
+        {% empty %}
+            <p>No exercises in this template yet. <a href="{% url 'edit_template' template.id %}">Add some exercises</a>.</p>
         {% endfor %}
 
         <div class="mt-4 d-flex gap-2">
             <button type="submit" class="btn btn-success btn-lg">Submit Workout</button>
-            <a href="{% url 'templates' %
+            <a href="{% url 'templates' %}" class="btn btn-secondary btn-lg">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
