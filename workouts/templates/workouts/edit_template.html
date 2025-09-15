@@ -7,6 +7,7 @@
 </head>
 <body class="bg-light">
 
+<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
     <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'home' %}">GymApp</a>
@@ -30,21 +31,21 @@
             <div class="card mb-3 shadow-sm p-3">
                 <div class="row g-3">
                     <div class="col-md-4">
-                        {{ form.exercise.label_tag }}<br>
+                        {{ form.exercise.label_tag }}
                         {{ form.exercise }}
                     </div>
                     <div class="col-md-4">
-                        {{ form.sets.label_tag }}<br>
+                        {{ form.sets.label_tag }}
                         {{ form.sets }}
                     </div>
                     <div class="col-md-4">
-                        {{ form.reps.label_tag }}<br>
+                        {{ form.reps.label_tag }}
                         {{ form.reps }}
                     </div>
                 </div>
 
                 <hr>
-                <h6>Add New Exercise</h6>
+                <h6>Add New Exercise Instead</h6>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <input type="text" name="form-{{ forloop.counter0 }}-new_exercise_name" class="form-control" placeholder="Exercise Name">
@@ -64,12 +65,15 @@
                 </div>
 
                 <div class="form-check mt-2">
-                    {{ form.DELETE }} {{ form.DELETE.label_tag }}
+                    {{ form.DELETE }} <label class="form-check-label">Delete Exercise</label>
                 </div>
             </div>
         {% endfor %}
 
-        <button type="submit" class="btn btn-primary btn-lg mt-3">Update Template</button>
+        <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn btn-primary btn-lg">Update Template</button>
+            <a href="{% url 'templates' %}" class="btn btn-secondary btn-lg">Cancel</a>
+        </div>
     </form>
 </div>
 
