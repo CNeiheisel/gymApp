@@ -55,25 +55,16 @@ def create_template(request):
             template.save()
 
             for i, form in enumerate(formset):
-                # Skip completely empty forms
-                if not form.cleaned_data or form.cleaned_data.get('DELETE', False):
-                    if form.cleaned_data.get('DELETE') and form.instance.id:
-                        form.instance.delete()
+                if not form.cleaned_data or form.cleaned_data.get("DELETE"):
                     continue
 
-                # Save existing exercise if selected
-                if form.cleaned_data.get('exercise'):
-                    exercise_instance = form.save(commit=False)
-                    exercise_instance.template = template
-                    exercise_instance.save()
+                # New exercise fields
+                new_name = request.POST.get(f"form-{i}-new_exercise_name", "").strip()
+                new_muscle = request.POST.get(f"form-{i}-new_muscle_group", "").strip()
+                new_sets = request.POST.get(f"form-{i}-sets", "").strip()
+                new_reps = request.POST.get(f"form-{i}-reps", "").strip()
 
-                # Handle new exercise typed by user
-                new_name = request.POST.get(f'form-{i}-new_exercise_name', '').strip()
-                new_muscle = request.POST.get(f'form-{i}-new_muscle_group', '').strip()
-                new_sets = request.POST.get(f'form-{i}-sets', '').strip()
-                new_reps = request.POST.get(f'form-{i}-reps', '').strip()
-
-                if new_name:
+                if new_name:  # Create new exercise
                     new_exercise = Exercise.objects.create(
                         name=new_name,
                         muscle_group=new_muscle
@@ -84,22 +75,26 @@ def create_template(request):
                         sets=int(new_sets) if new_sets else 3,
                         reps=int(new_reps) if new_reps else 10
                     )
+                elif form.cleaned_data.get("exercise"):  # Use existing exercise
+                    exercise_instance = form.save(commit=False)
+                    exercise_instance.template = template
+                    exercise_instance.save()
 
             messages.success(request, "Template created successfully!")
-            return redirect('templates')
+            return redirect("templates")
         else:
             messages.error(request, f"Template or exercises have errors: {template_form.errors} | {formset.errors}")
     else:
         template_form = WorkoutTemplateForm()
         formset = ExerciseFormSet(queryset=TemplateExercise.objects.none())
 
-    return render(request, 'workouts/create_template.html', {
-        'template_form': template_form,
-        'formset': formset
+    return render(request, "workouts/create_template.html", {
+        "template_form": template_form,
+        "formset": formset
     })
 
 
-# Edit an existing template (add/remove exercises)
+# Edit an existing template
 @login_required
 def edit_template(request, template_id):
     template = get_object_or_404(WorkoutTemplate, id=template_id, user=request.user)
@@ -116,26 +111,19 @@ def edit_template(request, template_id):
         if formset.is_valid():
             for i, form in enumerate(formset):
                 if not form.cleaned_data:
-                    continue  # Skip empty forms
+                    continue
 
-                # Delete marked exercises
-                if form.cleaned_data.get('DELETE') and form.instance.id:
+                if form.cleaned_data.get("DELETE") and form.instance.id:
                     form.instance.delete()
                     continue
 
-                # Save existing exercise if selected
-                if form.cleaned_data.get('exercise'):
-                    exercise_instance = form.save(commit=False)
-                    exercise_instance.template = template
-                    exercise_instance.save()
+                # New exercise fields
+                new_ex_name = request.POST.get(f"form-{i}-new_exercise_name", "").strip()
+                new_muscle_group = request.POST.get(f"form-{i}-new_muscle_group", "").strip()
+                new_sets = request.POST.get(f"form-{i}-sets", "").strip()
+                new_reps = request.POST.get(f"form-{i}-reps", "").strip()
 
-                # Handle new exercises typed by user
-                new_ex_name = request.POST.get(f'form-{i}-new_exercise_name', '').strip()
-                new_muscle_group = request.POST.get(f'form-{i}-new_muscle_group', '').strip()
-                new_sets = request.POST.get(f'form-{i}-sets', '').strip()
-                new_reps = request.POST.get(f'form-{i}-reps', '').strip()
-
-                if new_ex_name:
+                if new_ex_name:  # Add new exercise
                     new_exercise = Exercise.objects.create(
                         name=new_ex_name,
                         muscle_group=new_muscle_group
@@ -146,21 +134,25 @@ def edit_template(request, template_id):
                         sets=int(new_sets) if new_sets else 3,
                         reps=int(new_reps) if new_reps else 10
                     )
+                elif form.cleaned_data.get("exercise"):  # Update existing
+                    exercise_instance = form.save(commit=False)
+                    exercise_instance.template = template
+                    exercise_instance.save()
 
             messages.success(request, "Template updated successfully!")
-            return redirect('templates')
+            return redirect("templates")
         else:
             messages.error(request, f"Formset errors: {formset.errors}")
     else:
         formset = ExerciseFormSet(queryset=template.exercises.all())
 
-    return render(request, 'workouts/edit_template.html', {
-        'template': template,
-        'formset': formset
+    return render(request, "workouts/edit_template.html", {
+        "template": template,
+        "formset": formset
     })
 
 
-# Log a workout based on a template
+# Log a workout
 @login_required
 def log_workout(request, template_id):
     template = get_object_or_404(WorkoutTemplate, id=template_id, user=request.user)
@@ -190,11 +182,11 @@ def delete_template(request, template_id):
     if request.method == "POST":
         template.delete()
         messages.success(request, "Template deleted successfully!")
-        return redirect('templates')
-    return render(request, 'workouts/confirm_delete.html', {'template': template})
+        return redirect("templates")
+    return render(request, "workouts/confirm_delete.html", {"template": template})
 
 
-# Show user's workout history
+# Workout history
 @login_required
 def history(request):
     workouts = LoggedWorkout.objects.filter(user=request.user).order_by("-date")
