@@ -7,22 +7,31 @@
 </head>
 <body class="bg-light">
 
+<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/">GymApp</a>
+        <a class="navbar-brand" href="{% url 'home' %}">GymApp</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="{% url 'templates' %}">Templates</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'history' %}">History</a></li>
-                <form action="{% url 'logout' %}" method="post" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="nav-link btn btn-link" style="display:inline; padding:0; color:inherit; text-decoration:none;">Logout</button>
-                </form>
+                {% if user.is_authenticated %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'templates' %}">Templates</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'history' %}">History</a></li>
+                    <li class="nav-item">
+                        <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-link btn btn-link" style="display:inline; padding:0; color:inherit; text-decoration:none;">Logout</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
+                {% endif %}
             </ul>
         </div>
     </div>
 </nav>
 
+<!-- Main content -->
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Workout Templates</h2>
@@ -36,12 +45,17 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ template.name }}</h5>
                         <p class="card-text">{{ template.description }}</p>
-                        <a href="{% url 'log_workout' template.id %}" class="btn btn-primary w-100">Log Workout</a>
+                        <a href="{% url 'log_workout' template.id %}" class="btn btn-primary w-100 mb-2">Log Workout</a>
+                        <a href="{% url 'edit_template' template.id %}" class="btn btn-warning w-100 mb-2">Edit Template</a>
+                        <form method="post" action="{% url 'delete_template' template.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger w-100">Delete Template</button>
+                        </form>
                     </div>
                 </div>
             </div>
         {% empty %}
-            <p>No templates available yet.</p>
+            <p>No templates available yet. <a href="{% url 'create_template' %}">Create one now</a>.</p>
         {% endfor %}
     </div>
 </div>
