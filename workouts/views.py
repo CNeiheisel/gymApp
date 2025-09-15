@@ -54,14 +54,20 @@ def create_template(request):
             template.user = request.user
             template.save()
 
-            # Save exercises
             for i, form in enumerate(formset):
-                if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
-                    exercise = form.save(commit=False)
-                    exercise.template = template
-                    exercise.save()
+                # Skip completely empty forms
+                if not form.cleaned_data or form.cleaned_data.get('DELETE', False):
+                    if form.cleaned_data.get('DELETE') and form.instance.id:
+                        form.instance.delete()
+                    continue
 
-                # Handle new exercises typed by the user
+                # Save existing exercise if selected
+                if form.cleaned_data.get('exercise'):
+                    exercise_instance = form.save(commit=False)
+                    exercise_instance.template = template
+                    exercise_instance.save()
+
+                # Handle new exercise typed by user
                 new_name = request.POST.get(f'form-{i}-new_exercise_name', '').strip()
                 new_muscle = request.POST.get(f'form-{i}-new_muscle_group', '').strip()
                 new_sets = request.POST.get(f'form-{i}-sets', '').strip()
@@ -109,16 +115,21 @@ def edit_template(request, template_id):
 
         if formset.is_valid():
             for i, form in enumerate(formset):
+                if not form.cleaned_data:
+                    continue  # Skip empty forms
+
                 # Delete marked exercises
                 if form.cleaned_data.get('DELETE') and form.instance.id:
                     form.instance.delete()
-                elif form.cleaned_data:
-                    # Update existing exercise
+                    continue
+
+                # Save existing exercise if selected
+                if form.cleaned_data.get('exercise'):
                     exercise_instance = form.save(commit=False)
                     exercise_instance.template = template
                     exercise_instance.save()
 
-                # Handle new exercises
+                # Handle new exercises typed by user
                 new_ex_name = request.POST.get(f'form-{i}-new_exercise_name', '').strip()
                 new_muscle_group = request.POST.get(f'form-{i}-new_muscle_group', '').strip()
                 new_sets = request.POST.get(f'form-{i}-sets', '').strip()
