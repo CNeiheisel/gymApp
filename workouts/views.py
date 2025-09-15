@@ -3,7 +3,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.views.decorators.http import require_POST
+from django.forms import modelformset_factory
 from .models import WorkoutTemplate, TemplateExercise, LoggedWorkout, LoggedExercise, Exercise
+from .forms import WorkoutTemplateForm, TemplateExerciseForm
 
 # Home page
 def home(request):
@@ -49,6 +51,38 @@ def logout_view(request):
 def templates(request):
     templates = WorkoutTemplate.objects.filter(user=request.user)
     return render(request, "workouts/templates.html", {"templates": templates})
+
+# Create a new workout template with exercises
+@login_required
+def create_template(request):
+    ExerciseFormSet = modelformset_factory(TemplateExercise, form=TemplateExerciseForm, extra=1, can_delete=True)
+    
+    if request.method == "POST":
+        template_form = WorkoutTemplateForm(request.POST)
+        formset = ExerciseFormSet(request.POST, queryset=TemplateExercise.objects.none())
+        
+        if template_form.is_valid() and formset.is_valid():
+            # Save the template
+            template = template_form.save(commit=False)
+            template.user = request.user
+            template.save()
+            
+            # Save exercises
+            for form in formset:
+                if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                    exercise = form.save(commit=False)
+                    exercise.template = template
+                    exercise.save()
+            
+            return redirect('templates')
+    else:
+        template_form = WorkoutTemplateForm()
+        formset = ExerciseFormSet(queryset=TemplateExercise.objects.none())
+    
+    return render(request, 'workouts/create_template.html', {
+        'template_form': template_form,
+        'formset': formset
+    })
 
 # Log a workout based on a template
 @login_required
